@@ -84,7 +84,7 @@ export const App: React.FC = () => {
       if (err instanceof ApiError) {
         setError(err.message);
       } else {
-        setError('Unable to connect to Quorum API. Please ensure the backend server is running on port 3000.');
+        setError('Unable to connect to Quorum API. Please verify the backend service is running and reachable.');
       }
     } finally {
       setLoading(false);
