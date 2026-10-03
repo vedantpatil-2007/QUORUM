@@ -1,0 +1,40 @@
+{
+  "name": "quorum-server",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quorum Backend & Verification Engine",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "seed": "tsx src/db/seed.ts",
+    "db:inspect": "tsx src/db/inspect.ts",
+    "demo:builders": "tsx src/builders/cli.ts",
+    "verify:release": "tsx src/verification/cli.ts",
+    "demo:tamper": "tsx src/verification/demo-tamper.ts",
+    "quorum:release": "tsx src/quorum/cli.ts",
+    "ledger:verify": "tsx src/ledger/cli.ts",
+    "ledger:inspect": "tsx src/ledger/cli.ts",
+    "demo:ledger-tamper": "tsx src/ledger/demo-tamper.ts",
+    "api:dev": "tsx src/api/server.ts",
+    "api:start": "node dist/api/server.js",
+    "demo:api": "tsx src/api/demo.ts",
+    "seed:demo": "tsx src/db/seed-demo.ts"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^9.6.0",
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.10.2",
+    "@types/supertest": "^7.2.1",
+    "supertest": "^7.3.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

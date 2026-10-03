@@ -1,0 +1,41 @@
+{
+  "name": "quorum-workspace",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Quorum — Don't Trust the Binary, Trust the Builders",
+  "workspaces": [
+    "server",
+    "client"
+  ],
+  "scripts": {
+    "test": "npm --prefix server test",
+    "test:all": "npm --prefix server test && npm run test:root",
+    "test:root": "npm --prefix server exec vitest run ../tests",
+    "build": "npm --prefix server run build && npm --prefix client run build",
+    "typecheck": "npm --prefix server run typecheck && npm --prefix client run typecheck",
+    "demo:builders": "npm --prefix server run demo:builders --",
+    "verify:release": "npm --prefix server run verify:release --",
+    "demo:tamper": "npm --prefix server run demo:tamper --",
+    "quorum:release": "npm --prefix server run quorum:release --",
+    "ledger:verify": "npm --prefix server run ledger:verify --",
+    "ledger:inspect": "npm --prefix server run ledger:inspect --",
+    "demo:ledger-tamper": "npm --prefix server run demo:ledger-tamper --",
+    "api:dev": "npm --prefix server run api:dev",
+    "api:start": "npm --prefix server run api:start",
+    "demo:api": "npm --prefix server run demo:api",
+    "client:dev": "npm --prefix client run dev",
+    "client:build": "npm --prefix client run build",
+    "dev": "npm --prefix client run dev",
+    "seed:demo": "npm --prefix server run seed:demo"
+  },
+  "keywords": [
+    "supply-chain-security",
+    "reproducible-builds",
+    "attestation",
+    "quorum",
+    "consensus",
+    "ed25519"
+  ],
+  "author": "",
+  "license": "Apache-2.0"
+}
