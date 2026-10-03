@@ -31,6 +31,9 @@ export function createApp(options: AppOptions = {}): Express {
   app.use(express.json());
   app.use(securityMiddleware);
 
+  // Top-level liveness/health probe for Render and cloud orchestrators (GET /health)
+  app.use(createHealthRouter());
+
   // Mount API routers
   const apiRouter = express.Router();
   apiRouter.use(createHealthRouter());

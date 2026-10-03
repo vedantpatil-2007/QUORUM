@@ -18,6 +18,7 @@
     "ledger:verify": "tsx src/ledger/cli.ts",
     "ledger:inspect": "tsx src/ledger/cli.ts",
     "demo:ledger-tamper": "tsx src/ledger/demo-tamper.ts",
+    "start": "node dist/api/server.js",
     "api:dev": "tsx src/api/server.ts",
     "api:start": "node dist/api/server.js",
     "demo:api": "tsx src/api/demo.ts",

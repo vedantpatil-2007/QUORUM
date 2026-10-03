@@ -1,18 +1,39 @@
 import type { Request, Response, NextFunction } from 'express';
 
 /**
- * Controlled CORS and security headers middleware.
- * Configured for future React dashboard while blocking unsafe cross-origin practices.
+ * Production-ready CORS and security headers middleware.
+ * - Supports FRONTEND_URL and FRONTEND_ORIGIN (single or comma-separated list).
+ * - Preserves localhost and 127.0.0.1 development access.
+ * - Strictly avoids insecure wildcard ('*') CORS.
+ * - Appends standard security headers (nosniff, frameguard, referrer-policy, etc.).
  */
 export function securityMiddleware(req: Request, res: Response, next: NextFunction): void {
-  const allowedOrigin = process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+  const configuredOriginsRaw = process.env.FRONTEND_URL || process.env.FRONTEND_ORIGIN || 'http://localhost:5173';
+
+  // Parse comma-separated origins, normalize trailing slashes
+  const allowedOrigins = configuredOriginsRaw
+    .split(',')
+    .map((o) => o.trim().replace(/\/+$/, ''))
+    .filter(Boolean);
+
   const requestOrigin = req.headers.origin;
 
-  // Controlled CORS: allow requested origin if it matches allowed origin or local dev
-  if (requestOrigin && (requestOrigin === allowedOrigin || requestOrigin.startsWith('http://localhost:'))) {
-    res.setHeader('Access-Control-Allow-Origin', requestOrigin);
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (requestOrigin) {
+    const normalizedRequestOrigin = requestOrigin.trim().replace(/\/+$/, '');
+    const isAllowedConfigured = allowedOrigins.includes(normalizedRequestOrigin);
+    const isLocalhost =
+      normalizedRequestOrigin.startsWith('http://localhost:') ||
+      normalizedRequestOrigin === 'http://localhost' ||
+      normalizedRequestOrigin.startsWith('http://127.0.0.1:') ||
+      normalizedRequestOrigin === 'http://127.0.0.1';
+
+    if (isAllowedConfigured || isLocalhost) {
+      res.setHeader('Access-Control-Allow-Origin', requestOrigin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, DELETE');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With');
+      res.setHeader('Access-Control-Max-Age', '86400');
+    }
+    res.setHeader('Vary', 'Origin');
   }
 
   // Security headers

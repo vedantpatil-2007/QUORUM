@@ -1,13 +1,31 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { sha256 } from '../crypto/hash.js';
 import { canonicalize } from '../crypto/canonicalize.js';
 import { BuildRequest } from './builder.types.js';
 
-export const DEFAULT_ARTIFACTS_DIR =
-  path.basename(process.cwd()) === 'server'
-    ? path.resolve(process.cwd(), 'data', 'artifacts')
-    : path.resolve(process.cwd(), 'server', 'data', 'artifacts');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Server root directory (2 levels up from src/builders or dist/builders)
+const serverRoot = path.resolve(__dirname, '..', '..');
+
+export function resolveArtifactsDir(customDir?: string): string {
+  if (customDir) return customDir;
+  if (process.env.ARTIFACTS_DIR) return path.resolve(process.env.ARTIFACTS_DIR);
+
+  if (path.basename(process.cwd()) === 'server') {
+    return path.resolve(process.cwd(), 'data', 'artifacts');
+  }
+
+  if (fs.existsSync(path.resolve(process.cwd(), 'server'))) {
+    return path.resolve(process.cwd(), 'server', 'data', 'artifacts');
+  }
+
+  return path.resolve(serverRoot, 'data', 'artifacts');
+}
+
+export const DEFAULT_ARTIFACTS_DIR = resolveArtifactsDir();
 
 export interface GeneratedArtifact {
   artifactBytes: Buffer;
@@ -30,8 +48,9 @@ export interface GeneratedArtifact {
 export function generateDeterministicArtifact(
   request: BuildRequest,
   builderId: string,
-  artifactsDir = DEFAULT_ARTIFACTS_DIR
+  customArtifactsDir?: string
 ): GeneratedArtifact {
+  const artifactsDir = resolveArtifactsDir(customArtifactsDir);
   // Ensure artifacts output directory exists
   if (!fs.existsSync(artifactsDir)) {
     fs.mkdirSync(artifactsDir, { recursive: true });

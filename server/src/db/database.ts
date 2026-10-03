@@ -1,12 +1,30 @@
 import Database from 'better-sqlite3';
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { runMigrations } from './migrations.js';
 
-export const DEFAULT_DB_PATH =
-  path.basename(process.cwd()) === 'server'
-    ? path.resolve(process.cwd(), 'data', 'quorum.db')
-    : path.resolve(process.cwd(), 'server', 'data', 'quorum.db');
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// Server root directory (2 levels up from src/db or dist/db)
+const serverRoot = path.resolve(__dirname, '..', '..');
+
+export function resolveDatabasePath(customPath?: string): string {
+  if (customPath) return customPath;
+  if (process.env.DATABASE_PATH) return path.resolve(process.env.DATABASE_PATH);
+
+  if (path.basename(process.cwd()) === 'server') {
+    return path.resolve(process.cwd(), 'data', 'quorum.db');
+  }
+
+  if (fs.existsSync(path.resolve(process.cwd(), 'server'))) {
+    return path.resolve(process.cwd(), 'server', 'data', 'quorum.db');
+  }
+
+  return path.resolve(serverRoot, 'data', 'quorum.db');
+}
+
+export const DEFAULT_DB_PATH = resolveDatabasePath();
 
 export class DatabaseInitializationError extends Error {
   constructor(message: string, public cause?: unknown) {
@@ -36,7 +54,7 @@ export const REQUIRED_TABLES = [
  * configures WAL mode, runs migrations, and validates table existence.
  */
 export function initDatabase(options: DatabaseOptions = {}): Database.Database {
-  const dbPath = options.dbPath ?? DEFAULT_DB_PATH;
+  const dbPath = options.dbPath ?? resolveDatabasePath();
   const isInMemory = dbPath === ':memory:';
 
   try {
